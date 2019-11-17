@@ -1,0 +1,79 @@
+﻿@using WebMatrix.Data;
+@{
+    Validation.RequireField("cadeautoe", "Je moet een cadeau invoeren");
+
+    string uniekecode = (string)(Session["uniekecode"]);
+    string bruidspaarnaam = (string)(Session["bruidspaarnaam"]);
+    var cadeau = "";
+    Database db = Database.Open("Database");
+    var records = db.Query("SELECT * FROM Wenslijst");
+    var grid = new WebGrid(source: records, rowsPerPage: 8);
+
+    if (IsPost && Validation.IsValid())
+    {
+
+        cadeau = Request.Form["cadeautoe"];
+
+        var insertCadeau = "INSERT INTO Wenslijst (Cadeau) VALUES (@0)";
+        db.Execute(insertCadeau, cadeau);
+        Response.Redirect("~/userloggedin");
+    }
+
+}
+
+<html>
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-wrapper">
+            <a href="~/userloggedin.cshtml" class="brand-logo">a Special Day</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="~/userloggedin.cshtml">Wenslijst</a></li>
+                <li><a href="~/logoutpagina.cshtml">Logout</a></li>
+
+            </ul>
+        </div>
+    </nav>
+    <br />
+    <h3 class="center-align">Wenslijst van @bruidspaarnaam</h3>
+    <h5 class="center-align">Jouw unieke code is @uniekecode</h5>
+    <br /><br />
+    <div class="container">
+        <fieldset>
+            @grid.GetHtml(
+                          columns: grid.Columns(
+                           grid.Column("Cadeau"),
+                           grid.Column(format: @<a href="~/deletecadeau?id=@item.ID">Verwijder</a>),
+                           grid.Column(format: @<a href="~/ordercadeau?id=@item.ID">Helemaar naar onder sturen</a>)
+                    ))
+        </fieldset>
+    </div>
+    <br />
+    <div class="container">
+        <div class="row">
+            <form class="col 12" method="post">
+                <p>
+                    <label for="cadeautoe">Nieuwe cadeau toevoegen:</label>
+                    <input type="text" name="cadeautoe" value="@Request.Form["cadeautoe"]" />
+                    @Html.ValidationMessage("cadeautoe")
+                </p>
+                <p><input type="submit" name="buttonSubmit" value="Toevoegen" /></p>
+            </form>
+        </div>
+    </div>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+﻿@using WebMatrix.Data;
+@{
+    var cadeau = "";
+    var cadeauId = "";
+
+    if (!IsPost)
+    {
+        if (!Request.QueryString["ID"].IsEmpty() && Request.QueryString["ID"].IsInt())
+        {
+            cadeauId = Request.QueryString["ID"];
+            var db = Database.Open("Database");
+            var dbCommand = "SELECT * FROM Wenslijst WHERE ID = @0";
+            var row = db.QuerySingle(dbCommand, cadeauId);
+            if (row != null)
+            {
+                cadeau = row.Cadeau;
+
+            }
+            else
+            {
+                Validation.AddFormError("Er is geen cadeau voor die ID");
+            }
+        }
+        else
+        {
+            Validation.AddFormError("Er bevat geen cadeau voor die ID");
+        }
+    }
+    if (IsPost && !Request["buttonOrder"].IsEmpty())
+    {
+        cadeauId = Request.Form["cadeauId"];
+
+        Database db = Database.Open("Database");
+        var dbCommand = "SELECT * FROM Wenslijst WHERE ID = @0";
+        var row = db.QuerySingle(dbCommand, cadeauId);
+        cadeau = row.Cadeau;
+
+        var deleteCommand = "DELETE FROM Wenslijst WHERE ID = @0";
+        db.Execute(deleteCommand, cadeauId);
+
+        var insertCadeau = "INSERT INTO Wenslijst (Cadeau) VALUES (@0)";
+        db.Execute(insertCadeau, cadeau);
+
+        Response.Redirect("~/userloggedin");
+    }
+}
+
+
+<html>
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="~/Default.cshtml" class="brand-logo">a Special Day</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="~/codepagina.cshtml">Code</a></li>
+                <li><a href="~/wenslijstvalidatie.cshtml">Wenslijst</a></li>
+                <li><a href="~/registerpagina.cshtml">Register</a></li>
+                <li><a href="~/logoutpagina.cshtml">Logout</a></li>
+
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h4>Verwijder een cadeau</h4>
+        <p><a href="~/wenslijstpagina.cshtml">Terug naar wensenlijst</a></p>
+
+        <form method="post">
+            <fieldset>
+                <legend>Cadeau Informatie</legend>
+
+                <p>
+                    <span>Cadeau:</span>
+                    <span>@cadeau</span>
+                </p>
+
+                <input type="hidden" name="cadeauid" value="@cadeauId" />
+                <p><input type="submit" name="buttonOrder" value="Helemaal naar onder sturen" /></p>
+            </fieldset>
+        </form>
+    </div>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+</body>
+</html>

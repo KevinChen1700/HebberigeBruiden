@@ -1,0 +1,82 @@
+﻿@using WebMatrix.Data;
+@{
+    Validation.RequireField("gebruikersnaam", "Je moet een gebruikersnaam invoeren");
+    Validation.RequireField("wachtwoord", "Je met een wachtwoord invoeren");
+
+    var gebruikersnaam = "";
+    var wachtwoord = "";
+
+    if (IsPost && Validation.IsValid())
+    {
+        gebruikersnaam = Request.Form["gebruikersnaam"];
+        wachtwoord = Request.Form["wachtwoord"];
+        Database db = Database.Open("Database");
+        var records = db.Query("SELECT * FROM Users");
+        foreach (var recrod in records)
+        {
+            if (recrod.Gebruikersnaam == gebruikersnaam && recrod.Wachtwoord == wachtwoord)
+            {
+                Session["uniekecode"] = recrod.UniekeCode;
+                Session["bruidspaarnaam"] = recrod.Bruidspaarnaam;
+                Response.Redirect("/userloggedin");
+            }
+            else
+            {
+                Validation.AddFormError("Gebruikersnaam of wachtwoord is onjuist");
+            }
+        }
+    }
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+</head>
+
+<body>
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="~/Default.cshtml" class="brand-logo">a Special Day</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="~/codepagina.cshtml">Code</a></li>
+                <li><a href="~/wenslijstvalidatie.cshtml">Wenslijst</a></li>
+                <li><a href="~/registerpagina.cshtml">Register</a></li>
+                <li><a href="~/loginpagina.cshtml">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+    <br /><br />
+    <div class="container">
+        <form method="post">
+            <fieldset>
+                <legend>Login user</legend>
+                <p>
+                    <label for="gebruikersnaam">Gebruikersnaam:</label>
+                    <input type="text" id="gebruikersnaamID" name="gebruikersnaam" value="@Request.Form["gebruikersnaam"]" />
+                    @Html.ValidationMessage("gebruikersnaam")
+                </p>
+
+                <p>
+                    <label for="wachtwoord">Wachtwoord:</label>
+                    <input type="password" id="wachtwoordID" name="wachtwoord" value="@Request.Form["wachtwoord"]" />
+                    @Html.ValidationMessage("wachtwoord")
+                </p>
+                <p><input type="submit" name="buttonSubmit" value="login" /></p>
+            </fieldset>
+        </form>
+    </div>
+
+</body>
+</html>
